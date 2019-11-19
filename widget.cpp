@@ -22,6 +22,34 @@ Widget::Widget(QWidget *parent)
     ui->serialPortNameComboBox->addItems(serialPortNameList);
 
     createConnect();
+
+    QString header = "gz_test com";
+ #if 0
+    gzSendBuffList[IDX_DEBUG_COM] =  header + "uart_debug";
+    gzSendBuffList[IDX_ETHERNET] = header + "ethernet";
+    gzSendBuffList[IDX_485] = header + "485";
+    gzSendBuffList[IDX_CAN] = header + "can";
+    gzSendBuffList[IDX_PMBUS] = header + "pmbus";
+
+    gzAckBuffList[IDX_DEBUG_COM] = header + "ack uart_debug";
+    gzAckBuffList[IDX_ETHERNET] = header + "ack ethernet";
+    gzAckBuffList[IDX_485] = header + "ack 485";
+    gzAckBuffList[IDX_CAN] = header + "ack can";
+    gzAckBuffList[IDX_PMBUS] = header + "ack pmbus";
+#endif
+
+    gzSendBuffList << header + "uart_debug";
+    gzSendBuffList << header + "ethernet";
+    gzSendBuffList << header + "485";
+    gzSendBuffList << header + "can";
+    gzSendBuffList << header + "pmbus";
+
+    gzAckBuffList << header + "ack uart_debug";
+    gzAckBuffList << header + "ack ethernet";
+    gzAckBuffList << header + "ack 485";
+    gzAckBuffList << header + "ack can";
+    gzAckBuffList << header + "ack pmbus";
+
 }
 
 Widget::~Widget()
@@ -68,6 +96,9 @@ void Widget::createConnect()
 
     logMsg(stateText);
 });
+
+    connect(this, &Widget::readBytesChanged, this, &Widget::dealWithRecData);
+    connect(this, &Widget::writeBytesChanged, this, &Widget::dealWithSendData);
 }
 
 void Widget::logMsg(const QString &msg)
@@ -120,10 +151,12 @@ void Widget::closeReadWriter()
 void Widget::readData() {
     auto data = _readWriter->readAll();
     if (!data.isEmpty()) {
+        recBuff = data;
         qDebug() << QString::fromLocal8Bit(data);
 
         QString s( QString::fromLocal8Bit(data) );
         logMsg(s);
+        emit readBytesChanged(receiveCount);
     }
 }
 
@@ -146,10 +179,42 @@ void Widget::on_startBtn_clicked()
     if( openReadWriter() ) {
         qDebug("open success");
         ui->serialPortNameComboBox->setDisabled(true);
+        connect(_readWriter, &AbstractReadWriter::readyRead,
+                this, &Widget::readData);
+
 //        ui->startBtn->setDisabled(true);
     }else{
         qDebug("open failed");
         closeReadWriter();
         ui->serialPortNameComboBox->setDisabled(false);
+        disconnect(_readWriter, &AbstractReadWriter::readyRead,
+                this, &Widget::readData);
     }
+}
+
+void Widget::dealWithRecData(qint64 bytes)
+{
+    QString tmpBuff;
+    for(int i=0; i < bytes; i++) {
+        tmpBuff.append( recBuff.at(i) );
+    }
+
+    qDebug() << "len:" << bytes << " data:" << recBuff;
+
+    if( 0 == tmpBuff.compare( gzAckBuffList[IDX_DEBUG_COM] ) ) {
+        ;
+    }else if( 0 == tmpBuff.compare( gzAckBuffList[IDX_ETHERNET] ) ) {
+        ;
+    }else if( 0 == tmpBuff.compare( gzAckBuffList[IDX_485] ) ) {
+        ;
+    }else if( 0 == tmpBuff.compare( gzAckBuffList[IDX_CAN] ) ) {
+        ;
+    }else if( 0 == tmpBuff.compare( gzAckBuffList[IDX_PMBUS] ) ) {
+        ;
+    }
+}
+
+void Widget::dealWithSendData(qint64 bytes)
+{
+
 }
