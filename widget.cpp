@@ -204,8 +204,6 @@ void Widget::startTest(void)
         int ret = comTest->Test();
         // 进度条处理
         testProgressDlg->reset();
-        // 测试对象处理
-        comTest->Reset();
         // 串口处理
         closeReadWriter();
         ui->serialPortNameComboBox->setDisabled(false);
@@ -218,6 +216,9 @@ void Widget::startTest(void)
 //            QMessageBox::warning(this, "通信失败", "请检查通信连接", u8"退出");
             showError("通信失败", "请检查通信连接");
         }
+
+        // 测试对象处理
+        comTest->Reset();
 
         disconnect(comTest, SIGNAL(progress(int, int)), testProgressDlg, SLOT(showProgress(int, int)));
         disconnect(comTest, SIGNAL(logInfo(const QString &)), this, SLOT(logMsg(const QString &)));
@@ -388,7 +389,7 @@ restart:
                 log = "debug com success";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\n调试串口 - 正常"));
+                m_result_info.append(tr("\r\n调试串口  \t正常"));
                 goto restart;
                 break;
             case GZ_ACK_DEBUG_COM_FAILED:
@@ -399,7 +400,7 @@ restart:
                 log = "debug com failed";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\n调试串口 - 异常"));
+                m_result_info.append(tr("\r\n调试串口  \t异常"));
                 goto restart;
                 break;
             case GZ_ACK_ETHERNET_SUCCESS:
@@ -410,7 +411,7 @@ restart:
                 log = "ethernet com success";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\n以太网通信 - 正常"));
+                m_result_info.append(tr("\r\n以太网通信  \t正常"));
                 goto restart;
                 break;
             case GZ_ACK_ETHERNET_FAILED:
@@ -421,7 +422,7 @@ restart:
                 log = "ethernet com failed";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\n以太网通信 - 异常"));
+                m_result_info.append(tr("\r\n以太网通信  \t异常"));
                 goto restart;
                 break;
             case GZ_ACK_485_SUCCESS:
@@ -432,7 +433,7 @@ restart:
                 log = "485 com success";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\n485通信 - 正常"));
+                m_result_info.append(tr("\r\n485通信  \t正常"));
                 goto restart;
                 break;
             case GZ_ACK_485_FAILED:
@@ -445,8 +446,8 @@ restart:
                 qDebug() << log;
                 emit logInfo(log);
 
-                m_result_info.append(tr("\r\n485通信 - 异常"));
-                m_result_info.append(tr("\r\n\t详情如下："));
+                m_result_info.append(tr("\r\n485通信  \t异常"));
+                m_result_info.append(tr("\r\n(详情如下)："));
                 for(int i=0; i<8; i++) {
                     m_result_info.append(tr("\r\n\t通道"));
                     m_result_info.append( QString::number( (i+1), 10 ) );
@@ -468,7 +469,7 @@ restart:
                 log = "can com success";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\ncan通信 - 正常"));
+                m_result_info.append(tr("\r\ncan通信  \t正常"));
                 goto end;
                 break;
             case GZ_ACK_CAN_FAILED:
@@ -480,7 +481,7 @@ restart:
                 log = "can com failed";
                 qDebug() << log;
                 emit logInfo(log);
-                m_result_info.append(tr("\r\ncan通信 - 异常"));
+                m_result_info.append(tr("\r\ncan通信  \t异常"));
                 goto end;
                 break;
             default:
