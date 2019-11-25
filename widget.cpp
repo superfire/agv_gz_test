@@ -28,14 +28,15 @@ Widget::Widget(QWidget *parent)
     , testProgressDlg(new MyProgressDlg(this))
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("gz test tool"));
+    this->setWindowTitle(tr("agv工装测试软件"));
     this->setFixedSize( W_MAIN_WIDGET, H_MAIN_WIDGET );
 
     QStringList serialPortNameList = getSerialNameList();
     ui->serialPortNameComboBox->addItems(serialPortNameList);
 
     // 测试相关
-    comTest->m_testItemsNum = 4;
+    qDebug() << "test part num: " << comTest->m_testItemsNum;
+//    comTest->m_testItemsNum = 4;
 
     // 进度条
     testProgressDlg->setMaxNum(100);
@@ -102,7 +103,6 @@ void Widget::logMsg(const QString &msg)
     str.append(msg);
     ui->textBrowser_ExecInfo->append(str);
 }
-
 
 bool Widget::openReadWriter()
 {
@@ -251,8 +251,6 @@ void Widget::dealWithSendData(qint64 bytes)
     qDebug() << "send data len: " << count << "actual send data len:" << count;
 }
 
-
-
 MyProgressDlg::MyProgressDlg(QWidget *parent)
 {
 //    progressTimer = new QTimer();
@@ -365,17 +363,16 @@ restart:
 
         // waiting
         while( true )
-
         {
             switch( m_ack ) {
             case GZ_ACK_NONE:
                 // todo...
-                Delay_MSec_Suspend(100);
+                Delay_MSec_Suspend(200);
                 timeout ++;
                 progress_cnt++;
                 emit progress(progress_part, progress_cnt);
                 qDebug() << "timeout: " << timeout;
-                if( timeout > 15 ) // 1.5s超时
+                if( timeout > 15 ) // 3s超时
                 {
                     // timeout, debug comm has problem
                     return GZ_END_COM_TIMEOUT;
@@ -461,7 +458,7 @@ restart:
                 goto restart;
                 break;
             case GZ_ACK_CAN_SUCCESS:
-                // end
+                step = GZ_STEP_PMBUS;
                 timeout = 0;
                 progress_part = 4;
                 progress_cnt = 0;
@@ -470,10 +467,10 @@ restart:
                 qDebug() << log;
                 emit logInfo(log);
                 m_result_info.append(tr("\r\ncan通信  \t正常"));
-                goto end;
+                goto restart;
                 break;
             case GZ_ACK_CAN_FAILED:
-                // end
+                step = GZ_STEP_PMBUS;
                 timeout = 0;
                 progress_part = 4;
                 progress_cnt = 0;
@@ -482,13 +479,36 @@ restart:
                 qDebug() << log;
                 emit logInfo(log);
                 m_result_info.append(tr("\r\ncan通信  \t异常"));
+                goto restart;
+                break;
+            case GZ_ACK_PMBUS_SUCCESS:
+                // end
+                timeout = 0;
+                progress_part = 5;
+                progress_cnt = 0;
+                emit progress(progress_part, progress_cnt);
+                log = "pmbus com success";
+                qDebug() << log;
+                emit logInfo(log);
+                m_result_info.append(tr("\r\npmbus通信  \t正常"));
+                goto end;
+                break;
+            case GZ_ACK_PMBUS_FAILED:
+                // end
+                timeout = 0;
+                progress_part = 5;
+                progress_cnt = 0;
+                emit progress(progress_part, progress_cnt);
+                log = "pmbus com failed";
+                qDebug() << log;
+                emit logInfo(log);
+                m_result_info.append(tr("\r\npmbus通信  \t异常"));
                 goto end;
                 break;
             default:
                 break;
             }
         }
-
         timeout = 0;
     }
 

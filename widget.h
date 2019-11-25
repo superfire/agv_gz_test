@@ -95,19 +95,21 @@ public slots:
     void showProgress(int part, int cnt) {
         int base = (m_maxValue/m_partNum) * part;
         progressCnt = base + cnt;
+        if(progressCnt >= m_maxValue)
+            progressCnt = m_maxValue;
         setValue(progressCnt);
     }
 
 private:
     int m_maxValue = 0;
-    int m_partNum = 0; // m_maxValue一共分为m_partNum份，用来作为阶段进度显示
+    int m_partNum = 0; // m_maxValue涓�鍏卞垎涓簃_partNum浠斤紝鐢ㄦ潵浣滀负闃舵杩涘害鏄剧ず
 };
 
 class ComTest : public QObject
 {
     Q_OBJECT
 
-#define    TEST_ITEMS_NUM  4
+#define    TEST_ITEMS_NUM  5
 
 #define    MAX_FAIL_CNT    3
 
@@ -160,7 +162,7 @@ public slots:
     void SaveResult(QString ack, int id);
     void Reset(void) {
         m_ack = GZ_ACK_NONE;
-        m_result_info = "\r\n结果如下:\r\n";
+        m_result_info = "\r\n缁撴灉濡備笅:\r\n";
         for(int i=0; i<TEST_ITEMS_NUM; i++) {
             m_result[i].isPass = false;
             m_result[i].result = 0;
@@ -176,12 +178,12 @@ private:
 
     eTestAckDef m_ack = GZ_ACK_NONE;
     eTestDetailDef m_result[TEST_ITEMS_NUM];
-    QString m_result_info = "\r\n结果如下:\r\n";
+    QString m_result_info = "\r\n缁撴灉濡備笅:\r\n";
 
     QStringList m_gzTestBuffList;
     QMap<QString, int> m_ackMap;
     QMap<QString, eTestAckDef> m_stepMap;
-    int m_testItemsNum;
+    int m_testItemsNum = TEST_ITEMS_NUM;
 };
 
 
