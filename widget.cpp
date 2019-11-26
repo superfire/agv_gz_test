@@ -574,3 +574,13 @@ void ComTest::SaveResult(QString ackBuff, int id)
     }
 }
 
+
+void Widget::on_btn_about_clicked()
+{
+    QMessageBox::about(this, tr("关于"), tr("功能: avg充电站工装测试软件\r\n"
+                                          "版本:  V1.0.0\r\n"
+                                          "编译时间:  20191126 16:26\r\n"
+                                          "作者:  李扬\r\n"
+                                          "邮箱:  liyang@ecthf.com\r\n"
+                                          "公司：安徽博微智能电气有限公司"));
+}

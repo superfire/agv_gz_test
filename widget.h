@@ -50,6 +50,8 @@ private slots:
 
     void logMsg(const QString &message);
 
+    void on_btn_about_clicked();
+
 private:
     QStringList getSerialNameList();
     bool isReadWriterConnected();
